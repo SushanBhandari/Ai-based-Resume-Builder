@@ -6,8 +6,8 @@ export default async function db() {
   }
   try {
     await mongoose.connect(process.env.DATABASE);
-    console.log("Connected to database");
+    console.log("✔️Connected to database");
   } catch (error) {
-    console.error("error connectinfg to MongoDB".error);
+    console.log(" ❌Error connectinfg to MongoDB".error);
   }
 }

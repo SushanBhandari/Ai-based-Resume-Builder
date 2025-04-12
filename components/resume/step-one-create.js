@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useResume } from "@/context/resume";
 import { useUser, SignInButton } from "@clerk/nextjs";
 
-export default function StepOne() {
+export default function StepOneCreate() {
   const { resume, setResume, saveResume } = useResume();
 
   //hooks

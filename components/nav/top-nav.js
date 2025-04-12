@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ModeToggle } from "@/components/nav/mode-toggle";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
 function TopNav() {
   //hooks
   const { isSignedIn, user } = useUser();
@@ -13,9 +14,10 @@ function TopNav() {
       <Link href="/">
         <Image src="/logo.svg" alt="logo" width={50} height={50} />
       </Link>
+      <Toaster />
       <div className="flex justify-end items-center gap-2">
         {isSignedIn && (
-          <Link href="/Dashboard">{user?.fullName}'s Dashboard</Link>
+          <Link href="/dashboard">{user?.fullName}'s Dashboard</Link>
         )}
         <SignedOut>
           <SignInButton />
