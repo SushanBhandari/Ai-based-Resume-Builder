@@ -5,9 +5,11 @@ import {
   getUserResumeFromDb,
   getResumeFromDb,
   updateResumeFromDb,
+  updateExperienceToDb,
 } from "@/actions/resume";
 import toast from "react-hot-toast";
 import { useRouter, useParams, usePathname } from "next/navigation";
+import { runAi } from "@/actions/ai";
 const ResumeContext = React.createContext();
 const experienceField = {
   title: "",
@@ -34,7 +36,7 @@ export function ResumeProvider({ children }) {
   const [resumes, setResumes] = React.useState([]);
   //experience
   const [experienceList, setExperienceList] = React.useState([experienceField]);
-  const [experienceLoading, setExperienceLoading] = React.useState(false);
+  const [experienceLoading, setExperienceLoading] = React.useState({});
 
   //hooks
   const router = useRouter();
@@ -106,6 +108,20 @@ export function ResumeProvider({ children }) {
     }
   };
 
+  const updateExperience = async (experienceList) => {
+    try {
+      const data = await updateExperienceToDb({
+        ...resume,
+        experience: experienceList,
+      });
+      setResume(data);
+      toast.success("Experience Updated. Keep Working");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update experience");
+    }
+  };
+
   //expreience section
   React.useEffect(() => {
     if (resume.experience) {
@@ -113,12 +129,64 @@ export function ResumeProvider({ children }) {
     }
   }, [resume]);
 
-  const handleExperienceChange = (e, index) => {};
-  const handleExperienceQuillChange = (value, index) => {};
-  const handleExperienceSubmit = () => {};
-  const addExperirnce = () => {};
-  const removeExperience = () => {};
-  const handleExperienceGenerateWithAi = async () => {};
+  const handleExperienceChange = (e, index) => {
+    const newEntries = [...experienceList];
+    const { name, value } = e.target;
+    newEntries[index][name] = value;
+    setExperienceList(newEntries);
+  };
+  const handleExperiencetiptapChange = (value, index) => {
+    const newEntries = [...experienceList];
+    newEntries[index].summary = value;
+    setExperienceList(newEntries);
+  };
+  const handleExperienceSubmit = () => {
+    updateExperience(experienceList);
+    //setStep(4)
+  };
+  const addExperience = () => {
+    const newExperience = { ...experienceField };
+    setExperienceList([...experienceList, newExperience]);
+  };
+  const removeExperience = () => {
+    if (experienceList.length === 1) return;
+    const newEntries = experienceList.slice(0, experienceList.length - 1);
+    setExperienceList(newEntries);
+    //update the db with updated experiences
+  };
+  const handleExperienceGenerateWithAi = async (index) => {
+    setExperienceLoading((prevState) => ({ ...prevState, [index]: true }));
+    const selectedExperience = experienceList[index];
+    if (!selectedExperience || !selectedExperience.title) {
+      toast.error(
+        "please fill in the job details for the selected experience entry"
+      );
+      setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
+      return;
+    }
+    const jobTitle = selectedExperience.title;
+    const jobSummary = selectedExperience.summary || "";
+    try {
+      const response = await runAi(
+        `Generate a list of duties and responsibilities in html bullet points for job title "${jobTitle}" ${jobSummary}`
+      );
+      const updatedExperienceList = experienceList.slice();
+      updatedExperienceList[index] = {
+        ...selectedExperience,
+        summary: response,
+      };
+      setExperienceList(updatedExperienceList);
+      setResume((prevState) => ({
+        ...prevState,
+        experience: updatedExperienceList,
+      }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate job description");
+    } finally {
+      setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
+    }
+  };
 
   return (
     <ResumeContext.Provider
@@ -133,9 +201,9 @@ export function ResumeProvider({ children }) {
         experienceList,
         experienceLoading,
         handleExperienceChange,
-        handleExperienceQuillChange,
+        handleExperiencetiptapChange,
         handleExperienceSubmit,
-        addExperirnce,
+        addExperience,
         removeExperience,
         handleExperienceGenerateWithAi,
       }}

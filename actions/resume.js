@@ -78,3 +78,19 @@ export const updateResumeFromDb = async (data) => {
     throw new Error(err);
   }
 };
+export const updateExperienceToDb = async (data) => {
+  try {
+    db();
+    const { _id, experience } = data;
+    //check ownership
+    await checkOwnerShip(_id);
+    const resume = await Resume.findByIdAndUpdate(
+      _id,
+      { experience },
+      { new: true }
+    );
+    return JSON.parse(JSON.stringify(resume));
+  } catch (err) {
+    throw new Error(err);
+  }
+};
