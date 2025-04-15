@@ -32,6 +32,7 @@ const ResumeSchema = new Schema(
     job: String,
     address: String,
     phone: String,
+    email: String,
     themeColor: String,
     summary: String,
     experience: [ExperienceSchema],
