@@ -17,7 +17,11 @@ export default function RichTextEditor({ value, onChange }) {
     ],
     content: value,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      if (typeof onChange === "function") {
+        onChange(editor.getHTML());
+      } else {
+        console.warn("RichText Editor: oncahnge is not a function");
+      }
     },
   });
 

@@ -6,9 +6,9 @@ const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
 });
 export default function Experience({ resume }) {
   return (
-    <div className="my-6">
+    <div className="my-6 border border-gray-300 rounded-xl shadow-md p-6 bg-white">
       <h2
-        className="text-center font-bold  text-sm mb-2"
+        className=" font-bold  text-xl mb-2"
         style={{ color: resume.themeColor }}
       >
         Personal Experience
@@ -21,11 +21,15 @@ export default function Experience({ resume }) {
             <h3 className="text-sm">{exp?.company}</h3>
             <p className="text-xs text-gray-600">{exp?.address}</p>
             {exp?.summary && (
-              <RichTextEditor
-                value={exp.summary}
-                className="text-sm font-normal"
-              />
+              <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
+                <div
+                  className="text-sm text-gray-700 space-y-2"
+                  dangerouslySetInnerHTML={{ __html: exp.summary }}
+                />
+              </div>
             )}
+
+            <hr style={{ borderColor: resume.themeColor }} />
           </div>
         );
       })}

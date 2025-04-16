@@ -94,3 +94,37 @@ export const updateExperienceToDb = async (data) => {
     throw new Error(err);
   }
 };
+
+export const updateEducationToDb = async (data) => {
+  try {
+    db();
+    const { _id, education } = data;
+    //check ownership
+    await checkOwnerShip(_id);
+    const resume = await Resume.findByIdAndUpdate(
+      _id,
+      { education },
+      { new: true }
+    );
+    return JSON.parse(JSON.stringify(resume));
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+export const updateSkillToDb = async (data) => {
+  try {
+    db();
+    const { _id, skill } = data;
+    //check ownership
+    await checkOwnerShip(_id);
+    const resume = await Resume.findByIdAndUpdate(
+      _id,
+      { skill },
+      { new: true }
+    );
+    return JSON.parse(JSON.stringify(resume));
+  } catch (err) {
+    throw new Error(err);
+  }
+};

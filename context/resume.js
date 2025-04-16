@@ -6,6 +6,8 @@ import {
   getResumeFromDb,
   updateResumeFromDb,
   updateExperienceToDb,
+  updateEducationToDb,
+  updateSkillToDb,
 } from "@/actions/resume";
 import toast from "react-hot-toast";
 import { useRouter, useParams, usePathname } from "next/navigation";
@@ -19,6 +21,13 @@ const experienceField = {
   endDate: "",
   summary: "",
 };
+const educationField = {
+  name: "",
+  address: "",
+  qualification: "",
+  qualification: "",
+  year: "",
+};
 const initialState = {
   name: "",
   job: "",
@@ -27,16 +36,19 @@ const initialState = {
   email: "",
   themeColour: "",
   experience: [experienceField],
+  education: [educationField],
 };
 
 export function ResumeProvider({ children }) {
   //state
   const [resume, setResume] = React.useState(initialState);
   const [step, setStep] = React.useState(1);
-  const [resumes, setResumes] = React.useState([]);
+  const [resumes, setResumes] = React.useState([4]);
   //experience
   const [experienceList, setExperienceList] = React.useState([experienceField]);
   const [experienceLoading, setExperienceLoading] = React.useState({});
+  //
+  const [educationList, setEducationList] = React.useState([educationField]);
 
   //hooks
   const router = useRouter();
@@ -142,81 +154,47 @@ export function ResumeProvider({ children }) {
   };
   const handleExperienceSubmit = () => {
     updateExperience(experienceList);
-    //setStep(4)
+    setStep(4);
   };
   const addExperience = () => {
     const newExperience = { ...experienceField };
     setExperienceList([...experienceList, newExperience]);
+    setResume((prevState) => ({
+      ...prevState,
+      experience: [...experienceList, newExperience],
+    }));
   };
   const removeExperience = () => {
     if (experienceList.length === 1) return;
     const newEntries = experienceList.slice(0, experienceList.length - 1);
     setExperienceList(newEntries);
     //update the db with updated experiences
+    updateExperience(newEntries);
   };
-  // const handleExperienceGenerateWithAi = async (index) => {
-  //   setExperienceLoading((prevState) => ({ ...prevState, [index]: true }));
-  //   const selectedExperience = experienceList[index];
-  //   if (!selectedExperience || !selectedExperience.title) {
-  //     toast.error(
-  //       "please fill in the job details for the selected experience entry"
-  //     );
-  //     setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
-  //     return;
-  //   }
-  //   const jobTitle = selectedExperience.title;
-  //   const jobSummary = selectedExperience.summary || "";
-  //   try {
-  //     const response = await runAi(
-  //       `Generate a list of duties and responsibilities in html bullet points for job title "${jobTitle}" ${jobSummary}`
-  //     );
-  //     const updatedExperienceList = experienceList.slice();
-  //     updatedExperienceList[index] = {
-  //       ...selectedExperience,
-  //       summary: response,
-  //     };
-  //     setExperienceList(updatedExperienceList);
-  //     setResume((prevState) => ({
-  //       ...prevState,
-  //       experience: updatedExperienceList,
-  //     }));
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to generate job description");
-  //   } finally {
-  //     setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
-  //   }
-  // };
-
   const handleExperienceGenerateWithAi = async (index) => {
     setExperienceLoading((prevState) => ({ ...prevState, [index]: true }));
     const selectedExperience = experienceList[index];
-
     if (!selectedExperience || !selectedExperience.title) {
       toast.error(
-        "Please fill in the job details for the selected experience entry"
+        "please fill in the job details for the selected experience entry"
       );
       setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
       return;
     }
-
     const jobTitle = selectedExperience.title;
     const jobSummary = selectedExperience.summary || "";
-
     try {
       const response = await runAi(
-        `Generate a list of duties and responsibilities in HTML bullet points for job title "${jobTitle}" ${jobSummary}`
+        `Generate a list of duties and responsibilities in html bullet points for job title "${jobTitle}" ${jobSummary} Just give 4 bullet points in a  with their subtopics in a bold`
       );
 
-      // 🔥 Remove ```html and ``` from the AI response
       const cleanSummary = response.replace(/```html|```/g, "").trim();
 
-      const updatedExperienceList = [...experienceList];
+      const updatedExperienceList = experienceList.slice();
       updatedExperienceList[index] = {
         ...selectedExperience,
         summary: cleanSummary,
       };
-
       setExperienceList(updatedExperienceList);
       setResume((prevState) => ({
         ...prevState,
@@ -229,6 +207,58 @@ export function ResumeProvider({ children }) {
       setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
     }
   };
+  //education
+  React.useEffect(() => {
+    if (resume.education) {
+      setEducationList(resume.education);
+    }
+  }, [resume]);
+
+  const updateEducation = async (educationList) => {
+    try {
+      const data = await updateEducationToDb({
+        ...resume,
+        education: educationList,
+      });
+      setResume(data);
+      toast.success("Education Updated. Keep Working");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update Education");
+    }
+  };
+
+  const handleEducationChange = (e, index) => {
+    const newEntries = [...educationList];
+    const { name, value } = e.target;
+    newEntries[index][name] = value;
+    setEducationList(newEntries);
+  };
+  const handleEducationSubmit = () => {
+    updateEducation(educationList);
+    // setStep(5);
+  };
+  const addEducation = () => {
+    const newEducation = { ...educationField };
+    setEducationList([...educationList, newEducation]);
+    setResume((prevState) => ({
+      ...prevState,
+      education: [...educationList, newEducation],
+    }));
+  };
+  const removeEducation = () => {
+    if (educationList.length === 1) return;
+    const newEntries = educationList.slice(0, educationList.length - 1);
+    setEducationList(newEntries);
+    //update the db with updated education array
+  };
+
+  //skill section
+  React.useEffect(() => {
+    if (resume.skills) {
+      setSkillsList(resume.skills);
+    }
+  });
 
   return (
     <ResumeContext.Provider
@@ -248,6 +278,11 @@ export function ResumeProvider({ children }) {
         addExperience,
         removeExperience,
         handleExperienceGenerateWithAi,
+        educationList,
+        handleEducationChange,
+        handleEducationSubmit,
+        addEducation,
+        removeEducation,
       }}
     >
       {children}
