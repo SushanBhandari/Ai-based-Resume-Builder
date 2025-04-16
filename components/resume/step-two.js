@@ -9,8 +9,9 @@ import { runAi } from "@/actions/ai";
 // const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 // import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
-
-const RichText = dynamic(() => import("@/components/RichText"), { ssr: false });
+const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
+  ssr: false,
+});
 function StepTwo() {
   //context
   const { resume, setResume, updateResume, setStep } = useResume();
@@ -74,7 +75,7 @@ function StepTwo() {
         value={resume.summary}
         className="mb-5 rounded-md"
       /> */}
-      <RichText
+      <RichTextEditor
         value={resume.summary}
         onChange={(val) => setResume({ ...resume, summary: val })}
       />

@@ -3,7 +3,9 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useResume } from "@/context/resume";
 import dynamic from "next/dynamic";
-const RichText = dynamic(() => import("@/components/RichText"), { ssr: false });
+const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
+  ssr: false,
+});
 import { ArrowRight, Plus, X, Loader2Icon, Brain } from "lucide-react";
 
 export default function StepThree() {
@@ -64,7 +66,7 @@ export default function StepThree() {
               value={experience.endDate}
               className="mb-3"
             />
-            <RichText
+            <RichTextEditor
               value={experience.summary}
               onChange={(value) => handleExperiencetiptapChange(value, index)}
               className="mb-2"

@@ -21,7 +21,7 @@ export default function RichTextEditor({ value, onChange }) {
     },
   });
 
-  // Update editor content if parent prop `value` changes
+  // Update editor content if parent prop value changes
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
       editor.commands.setContent(value);

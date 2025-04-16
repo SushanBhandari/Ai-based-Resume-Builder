@@ -154,27 +154,69 @@ export function ResumeProvider({ children }) {
     setExperienceList(newEntries);
     //update the db with updated experiences
   };
+  // const handleExperienceGenerateWithAi = async (index) => {
+  //   setExperienceLoading((prevState) => ({ ...prevState, [index]: true }));
+  //   const selectedExperience = experienceList[index];
+  //   if (!selectedExperience || !selectedExperience.title) {
+  //     toast.error(
+  //       "please fill in the job details for the selected experience entry"
+  //     );
+  //     setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
+  //     return;
+  //   }
+  //   const jobTitle = selectedExperience.title;
+  //   const jobSummary = selectedExperience.summary || "";
+  //   try {
+  //     const response = await runAi(
+  //       `Generate a list of duties and responsibilities in html bullet points for job title "${jobTitle}" ${jobSummary}`
+  //     );
+  //     const updatedExperienceList = experienceList.slice();
+  //     updatedExperienceList[index] = {
+  //       ...selectedExperience,
+  //       summary: response,
+  //     };
+  //     setExperienceList(updatedExperienceList);
+  //     setResume((prevState) => ({
+  //       ...prevState,
+  //       experience: updatedExperienceList,
+  //     }));
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to generate job description");
+  //   } finally {
+  //     setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
+  //   }
+  // };
+
   const handleExperienceGenerateWithAi = async (index) => {
     setExperienceLoading((prevState) => ({ ...prevState, [index]: true }));
     const selectedExperience = experienceList[index];
+
     if (!selectedExperience || !selectedExperience.title) {
       toast.error(
-        "please fill in the job details for the selected experience entry"
+        "Please fill in the job details for the selected experience entry"
       );
       setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
       return;
     }
+
     const jobTitle = selectedExperience.title;
     const jobSummary = selectedExperience.summary || "";
+
     try {
       const response = await runAi(
-        `Generate a list of duties and responsibilities in html bullet points for job title "${jobTitle}" ${jobSummary}`
+        `Generate a list of duties and responsibilities in HTML bullet points for job title "${jobTitle}" ${jobSummary}`
       );
-      const updatedExperienceList = experienceList.slice();
+
+      // 🔥 Remove ```html and ``` from the AI response
+      const cleanSummary = response.replace(/```html|```/g, "").trim();
+
+      const updatedExperienceList = [...experienceList];
       updatedExperienceList[index] = {
         ...selectedExperience,
-        summary: response,
+        summary: cleanSummary,
       };
+
       setExperienceList(updatedExperienceList);
       setResume((prevState) => ({
         ...prevState,

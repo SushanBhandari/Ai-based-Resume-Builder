@@ -7,8 +7,8 @@ import StepThree from "@/components/resume/step-three";
 import StepFour from "@/components/resume/step-four";
 import StepFive from "@/components/resume/step-five";
 import ResumeCreateNav from "@/components/nav/resume-create-nav";
-import { Preahvihear } from "next/font/google";
 import PreviewCard from "@/components/cards/preview-card";
+
 function ResumeCreatePage() {
   //context
   const { step } = useResume();
