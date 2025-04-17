@@ -7,7 +7,8 @@ import {
   updateResumeFromDb,
   updateExperienceToDb,
   updateEducationToDb,
-  updateSkillToDb,
+  updateSkillsToDb,
+  deleteResumeFromDb,
 } from "@/actions/resume";
 import toast from "react-hot-toast";
 import { useRouter, useParams, usePathname } from "next/navigation";
@@ -28,6 +29,10 @@ const educationField = {
   qualification: "",
   year: "",
 };
+const skillField = {
+  name: "",
+  lelev: "",
+};
 const initialState = {
   name: "",
   job: "",
@@ -37,19 +42,22 @@ const initialState = {
   themeColour: "",
   experience: [experienceField],
   education: [educationField],
+  skills: [skillField],
 };
 
 export function ResumeProvider({ children }) {
   //state
   const [resume, setResume] = React.useState(initialState);
-  const [step, setStep] = React.useState(1);
-  const [resumes, setResumes] = React.useState([4]);
+  const [resumes, setResumes] = React.useState([]);
+  const [step, setStep] = React.useState([1]);
+
   //experience
   const [experienceList, setExperienceList] = React.useState([experienceField]);
   const [experienceLoading, setExperienceLoading] = React.useState({});
   //
   const [educationList, setEducationList] = React.useState([educationField]);
-
+  //skills
+  const [skillsList, setSkillsList] = React.useState([skillField]);
   //hooks
   const router = useRouter();
   const { _id } = useParams();
@@ -236,7 +244,7 @@ export function ResumeProvider({ children }) {
   };
   const handleEducationSubmit = () => {
     updateEducation(educationList);
-    // setStep(5);
+    setStep(5);
   };
   const addEducation = () => {
     const newEducation = { ...educationField };
@@ -251,6 +259,7 @@ export function ResumeProvider({ children }) {
     const newEntries = educationList.slice(0, educationList.length - 1);
     setEducationList(newEntries);
     //update the db with updated education array
+    updateEducation(newEntries);
   };
 
   //skill section
@@ -258,7 +267,69 @@ export function ResumeProvider({ children }) {
     if (resume.skills) {
       setSkillsList(resume.skills);
     }
-  });
+  }, [resume]);
+
+  const updateSkills = async (skillsList) => {
+    //validation that each skill has both name and label
+    const invalidSkills = skillsList.filter(
+      (skill) => !skill.name || !skill.level
+    );
+    if (invalidSkills.length > 0) {
+      toast.error("please fill the box skill and level");
+      return;
+    }
+    try {
+      const data = await updateSkillsToDb({
+        ...resume,
+        skills: skillsList,
+      });
+      setResume(data);
+      toast.success("Skills Updated. Keep Working");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update Skills");
+    }
+  };
+  const handleSkillsChange = (e, index) => {
+    const newEntries = [...skillsList];
+    const { name, value } = e.target;
+    newEntries[index][name] = value;
+    setSkillsList(newEntries);
+  };
+
+  const handleSkillsSubmit = () => {
+    updateSkills(skillsList);
+    router.push(`/dashboard/resume/download/${resume._id}`);
+  };
+
+  const addSkill = () => {
+    const newSkill = { ...skillField };
+    setSkillsList([...skillsList, newSkill]);
+    setResume((prevState) => ({
+      ...prevState,
+      skills: [...skillsList, newSkill],
+    }));
+  };
+  const removeSkill = () => {
+    if (skillsList.length === 1) return;
+    const newEntries = skillsList.slice(0, skillsList.length - 1);
+    setSkillsList(newEntries);
+    //update the db with updated education array
+    updateSkills(newEntries);
+  };
+
+  const deleteResume = async (_id) => {
+    try {
+      await deleteResumeFromDb(_id);
+      setResume((prevResumes) =>
+        resumes.filter((resume) => resume._id !== _id)
+      );
+      toast.success("Resume deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      toast.error("Oops! Failed to delete the resume.");
+    }
+  };
 
   return (
     <ResumeContext.Provider
@@ -283,6 +354,12 @@ export function ResumeProvider({ children }) {
         handleEducationSubmit,
         addEducation,
         removeEducation,
+        skillsList,
+        handleSkillsChange,
+        handleSkillsSubmit,
+        addSkill,
+        removeSkill,
+        deleteResume,
       }}
     >
       {children}

@@ -2,7 +2,8 @@
 import db from "@/utils/db";
 import Resume from "@/Models/resume";
 import { currentUser } from "@clerk/nextjs/server";
-import { isJSDocReturnTag } from "typescript";
+import { throwDeprecation } from "process";
+
 const checkOwnerShip = async (resumeId) => {
   try {
     const user = await currentUser();
@@ -112,19 +113,29 @@ export const updateEducationToDb = async (data) => {
   }
 };
 
-export const updateSkillToDb = async (data) => {
+export const updateSkillsToDb = async (data) => {
   try {
     db();
-    const { _id, skill } = data;
+    const { _id, skills } = data;
     //check ownership
     await checkOwnerShip(_id);
     const resume = await Resume.findByIdAndUpdate(
       _id,
-      { skill },
+      { skills },
       { new: true }
     );
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
     throw new Error(err);
+  }
+};
+export const deleteResumeFromDb = async (_id) => {
+  try {
+    db();
+    await checkOwnerShip(_id);
+    const resume = await Resume.findByIdAndDelete(_id);
+    return JSON.parse(JSON.stringify(resume));
+  } catch (err) {
+    throw new Error(err.message || "Failed to delete resume from database");
   }
 };

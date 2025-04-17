@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useResume } from "@/context/resume";
 import { useUser, SignInButton } from "@clerk/nextjs";
+import { HexColorPicker } from "react-colorful";
 
 export default function StepOne() {
   const { resume, setResume, updateResume, setStep } = useResume();
@@ -73,6 +74,10 @@ export default function StepOne() {
         placeholder="Email"
         type="email"
         required
+      />
+      <HexColorPicker
+        color={resume.themeColor}
+        onChange={(themeColor) => setResume({ ...resume, themeColor })}
       />
 
       <div className="flex justify-end">

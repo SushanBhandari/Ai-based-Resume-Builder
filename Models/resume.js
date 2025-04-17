@@ -4,8 +4,8 @@ const ExperienceSchema = new Schema({
   title: String,
   company: String,
   address: String,
-  startDate: Date,
-  endDate: Date,
+  startDate: String,
+  endDate: String,
   summary: String,
 });
 
