@@ -121,3 +121,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/*hide nav on print */
+@media print{
+  @page {
+    margin: 0;
+  }
+  .top-nav{
+    display: none;
+  }
+}

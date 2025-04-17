@@ -10,7 +10,7 @@ export default function Skills({ resume, print = false }) {
       <h2 className="font-bold text-sm mb-2" style={{ color: themeColor }}>
         skills
       </h2>
-      <hr style={{ borderColour: themeColor }} />
+      <hr style={{ borderColor: themeColor }} />
       <div className="grid grid-cols-2 gap-3 my-4">
         {resume?.skills.map((skill, index) => {
           return (
