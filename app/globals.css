@@ -121,14 +121,44 @@
     @apply bg-background text-foreground;
   }
 }
-
-
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--ring);
+  border-radius: 4px;
+}
 /*hide nav on print */
-@media print{
+/* Print Styles */
+@media print {
   @page {
     margin: 0;
   }
-  .top-nav{
-    display: none;
+  .top-nav,
+  .sidebar,
+  .no-print,
+  button,
+  nav {
+    display: none !important;
   }
+}
+
+/* Accessibility for Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.ResumeCard::-webkit-scrollbar {
+  width: 6px;
+}
+.ResumeCard::-webkit-scrollbar-thumb {
+  background-color: var(--ring);
+  border-radius: 4px;
 }

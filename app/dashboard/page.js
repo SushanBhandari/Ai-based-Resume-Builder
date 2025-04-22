@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { useResume } from "@/context/resume";
 import SkeletonCard from "@/components/cards/skeleton-cards";
@@ -6,23 +7,29 @@ import ResumeCard from "@/components/cards/resume-card";
 
 export default function Dashboard() {
   const { resumes } = useResume();
-  if (!resumes?.length) {
-    return (
-      <div>
-        <p className="text-center my-5">Loading..</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid=cols-3 gap-4 m-5 px-5">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      </div>
-    );
-  }
+
+  const isLoading = !resumes?.length;
+
   return (
-    <div className="grid drid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 m-5 px-5">
-      {resumes?.map((resume) => (
-        <ResumeCard key={resume._id} resume={resume} />
-      ))}
+    <div className="min-h-screen px-5 py-10">
+      {isLoading ? (
+        <>
+          <p className="text-center text-muted-foreground mb-6 text-sm">
+            Fetching your resumes...
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
+          {resumes.map((resume) => (
+            <ResumeCard key={resume._id} resume={resume} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
