@@ -1,15 +1,12 @@
-"use client";
-
 import React from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useResume } from "@/context/resume";
 import dynamic from "next/dynamic";
-import { ArrowRight, Plus, X, Loader2, Brain } from "lucide-react";
-
 const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
   ssr: false,
 });
+import { ArrowRight, Plus, X, Loader2Icon, Brain } from "lucide-react";
 
 export default function StepThree() {
   const {
@@ -22,23 +19,19 @@ export default function StepThree() {
     handleExperienceGenerateWithAi,
     experienceLoading,
   } = useResume();
-
   return (
-    <div className="w-full p-5 shadow-lg border-t-4 border-border rounded-lg overflow-y-auto">
+    <div className="w-full shadow-lg border-t4 rounded-lg overflow-y-auto">
       <h2 className="text-2xl font-bold mb-5">Experience</h2>
-
       {experienceList?.length > 0 &&
-        experienceList.map((experience, index) => (
-          <div
-            key={index}
-            className="mb-10 border border-muted rounded-md p-4 space-y-3"
-          >
+        experienceList?.map((experience, index) => (
+          <div key={index} className="mb-10">
             <Input
               name="title"
               type="text"
               placeholder="Job title"
               onChange={(e) => handleExperienceChange(e, index)}
               value={experience.title}
+              className="mb-3"
             />
             <Input
               name="company"
@@ -46,37 +39,39 @@ export default function StepThree() {
               placeholder="Company name"
               onChange={(e) => handleExperienceChange(e, index)}
               value={experience.company}
+              className="mb-3"
             />
+
             <Input
               name="address"
               type="text"
               placeholder="Company address"
               onChange={(e) => handleExperienceChange(e, index)}
               value={experience.address}
+              className="mb-3"
             />
-            <div className="flex gap-3">
-              <Input
-                name="startDate"
-                type="text"
-                placeholder="Start date"
-                onChange={(e) => handleExperienceChange(e, index)}
-                value={experience.startDate}
-              />
-              <Input
-                name="endDate"
-                type="text"
-                placeholder="End date"
-                onChange={(e) => handleExperienceChange(e, index)}
-                value={experience.endDate}
-              />
-            </div>
-
+            <Input
+              name="startDate"
+              type="text"
+              placeholder="Start date"
+              onChange={(e) => handleExperienceChange(e, index)}
+              value={experience.startDate}
+              className="mb-3"
+            />
+            <Input
+              name="endDate"
+              type="text"
+              placeholder="End date"
+              onChange={(e) => handleExperienceChange(e, index)}
+              value={experience.endDate}
+              className="mb-3"
+            />
             <RichTextEditor
               value={experience.summary}
               onChange={(value) => handleExperiencetiptapChange(value, index)}
-              placeholder="Job summary"
+              className="mb-2"
+              placeholder=" Job summary"
             />
-
             <div className="flex justify-end">
               <Button
                 variant="destructive"
@@ -84,7 +79,7 @@ export default function StepThree() {
                 disabled={experienceLoading[index]}
               >
                 {experienceLoading[index] ? (
-                  <Loader2 size={18} className="mr-2 animate-spin" />
+                  <Loader2Icon size={18} className="mr-2" />
                 ) : (
                   <Brain size={18} className="mr-2" />
                 )}
@@ -93,21 +88,17 @@ export default function StepThree() {
             </div>
           </div>
         ))}
-
-      {/* Control Buttons */}
-      <div className="flex justify-between flex-wrap gap-2 mt-4">
-        <Button variant="outline" onClick={addExperience}>
-          <Plus size={18} className="mr-2" /> Add Experience
+      <div className="flex justify-between mt-3">
+        <Button varient="outline" onClick={addExperience}>
+          <Plus size={18} className="mr-2" /> Add
         </Button>
-
         {experienceList?.length > 1 && (
           <Button variant="outline" onClick={removeExperience}>
-            <X size={18} className="mr-2" /> Remove Last
+            <X size={18} className="mr-2" /> Remove
           </Button>
         )}
-
-        <Button variant="default" onClick={handleExperienceSubmit}>
-          <ArrowRight size={18} className="mr-2" /> Next
+        <Button varient="outline" onClick={handleExperienceSubmit}>
+          <Plus size={18} className="mr-2" /> Next
         </Button>
       </div>
     </div>

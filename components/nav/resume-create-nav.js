@@ -8,45 +8,23 @@ export default function ResumeCreateNav() {
   const pathname = usePathname();
   const isEditPage = pathname.includes("/edit/");
 
-  const steps = [
-    { id: 1, label: "Personal" },
-    { id: 2, label: "Summary" },
-    { id: 3, label: "Experience" },
-    { id: 4, label: "Education" },
-    { id: 5, label: "Skills" },
-  ];
-
   return (
     <nav className="flex justify-center w-full py-4">
       <div className="flex space-x-4">
-        {steps.map(({ id, label }) => {
-          const isActive = step === id;
-          const isDisabled = !isEditPage && step < id;
-
-          return (
-            <Button
-              key={id}
-              onClick={() => setStep(id)}
-              disabled={isDisabled}
-              aria-current={isActive ? "step" : undefined}
-              className={`w-10 h-10 flex items-center justify-center rounded-full transition 
-                ${
-                  isActive
-                    ? "bg-primary text-white dark:text-slate-800"
-                    : "bg-secondary text-gray-700 dark:text-gray-400"
-                }
-                ${
-                  isDisabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-primary hover:text-white dark:hover:text-slate-800"
-                }
-              `}
-              title={label} // Optional Tooltip
-            >
-              {id}
-            </Button>
-          );
-        })}
+        {[1, 2, 3, 4, 5].map((item) => (
+          <Button
+            className={`w-10 h-10 flex items-center justify-center rounded-full transaction hover:bg:primary hover:text-slate-200 ${
+              step === item
+                ? "bg-primary text-slate-200 dark:text-slate-800"
+                : "bg-secondary text-gray-700 dark:text-gray-400"
+            }`}
+            key={item}
+            onClick={() => setStep(item)}
+            disabled={!isEditPage && step < item}
+          >
+            {item}
+          </Button>
+        ))}
       </div>
     </nav>
   );

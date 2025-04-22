@@ -1,24 +1,14 @@
 import React from "react";
+import renderHTML from "react-render-html";
 
 export default function Summary({ resume }) {
-  const themeColor = resume?.themeColor || "#333";
-
   return (
-    <div className="my-6">
-      <h2 className="font-bold text-sm mb-2" style={{ color: themeColor }}>
+    <div className="mt-5">
+      <h2 className="font-bold mb-3" style={{}}>
         Summary
       </h2>
-      <hr style={{ borderColor: themeColor }} />
-
-      {resume?.summary ? (
-        <div
-          className="text-sm text-muted-foreground leading-relaxed mt-3 space-y-2"
-          dangerouslySetInnerHTML={{ __html: resume.summary }}
-        />
-      ) : (
-        <p className="text-sm text-muted-foreground mt-3">
-          No summary has been added yet.
-        </p>
+      {resume.summary && (
+        <div className="text-xs font-normal ">{renderHTML(resume.summary)}</div>
       )}
     </div>
   );

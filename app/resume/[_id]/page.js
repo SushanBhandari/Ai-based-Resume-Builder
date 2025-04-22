@@ -5,38 +5,25 @@ import Summary from "@/components/preview/summary";
 import Experience from "@/components/preview/experience";
 import Skills from "@/components/preview/skills";
 import Education from "@/components/preview/education";
-import { notFound } from "next/navigation"; // For 404
 
 export async function generateMetadata({ params }) {
   const resume = await getResumeFromDb(params._id);
-
-  if (!resume) {
-    return {
-      title: "Resume Not Found",
-      description: "No resume available for this ID.",
-    };
-  }
-
   return {
-    title: `${resume.name || "Unnamed"} - Resume`,
-    description: resume.summary || "View this AI-generated resume.",
+    title: `${resume.name} - resume,
+    description: resume.summary,
     openGraph: {
-      title: `${resume.name || "Unnamed"}'s Resume`,
-      description: resume.summary || "AI-generated resume preview.",
+      title: ${resume.name}'s - Resume,
+      description: resume.summary,
       images: ["/logo.svg"],
-    },
+    }`,
   };
 }
 
 export default async function ResumePage({ params }) {
   const resume = await getResumeFromDb(params._id);
 
-  if (!resume) {
-    notFound(); // Show 404 page
-  }
-
   return (
-    <div className="p-4 md:p-10 lg:p-20 animate-fadeIn">
+    <div className="m-20">
       <PersonalDetails resume={resume} />
       <Summary resume={resume} />
       <Experience resume={resume} />

@@ -1,80 +1,89 @@
 "use server";
-
 import db from "@/utils/db";
 import Resume from "@/Models/resume";
 import { currentUser } from "@clerk/nextjs/server";
 
-// Utility: Get current user email
-const getUserEmail = async () => {
-  const user = await currentUser();
-  const email = user?.emailAddresses?.[0]?.emailAddress;
-  if (!email) throw new Error("User email not found.");
-  return email;
+const checkOwnerShip = async (resumeId) => {
+  try {
+    const user = await currentUser();
+    const userEmail = user?.emailAddresses[0]?.emailAddress;
+    if (!userEmail) {
+      throw new Error("User not found");
+    }
+    const resume = await Resume.findById(resumeId);
+    if (!resume) {
+      throw new Error("Resume not found");
+    }
+    if (resume.userEmail !== userEmail) {
+      throw new Error("Unauthorized");
+    }
+    return true;
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
-// Utility: Check if current user owns the resume
-const checkOwnership = async (resumeId) => {
-  const email = await getUserEmail();
-  const resume = await Resume.findById(resumeId);
-  if (!resume) throw new Error("Resume not found.");
-  if (resume.userEmail !== email) throw new Error("Unauthorized access.");
-};
-
-// Save new resume
 export const saveResumetoDb = async (data) => {
   try {
     db();
-    const userEmail = await getUserEmail();
+    const user = await currentUser();
+    const userEmail = user?.emailAddresses[0]?.emailAddress;
+
     const { _id, ...rest } = data;
+
     const resume = await Resume.create({ ...rest, userEmail });
     return JSON.parse(JSON.stringify(resume));
   } catch (error) {
-    throw new Error(error.message || "Failed to save resume.");
+    throw new Error(error);
   }
 };
 
-// Get all resumes of current user
 export const getUserResumeFromDb = async () => {
   try {
     db();
-    const userEmail = await getUserEmail();
+    const user = await currentUser();
+    const userEmail = user?.emailAddresses[0]?.emailAddress;
+
     const resumes = await Resume.find({ userEmail });
     return JSON.parse(JSON.stringify(resumes));
   } catch (err) {
-    throw new Error(err.message || "Failed to fetch resumes.");
+    throw new Error(err);
   }
 };
 
-// Get single resume by ID
 export const getResumeFromDb = async (_id) => {
   try {
     db();
     const resume = await Resume.findById(_id);
-    if (!resume) throw new Error("Resume not found.");
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
-    throw new Error(err.message || "Failed to fetch resume.");
+    throw new Error(err);
   }
 };
 
-// Update entire resume
 export const updateResumeFromDb = async (data) => {
   try {
     db();
     const { _id, ...rest } = data;
-    await checkOwnership(_id);
-    const resume = await Resume.findByIdAndUpdate(_id, rest, { new: true });
+    //check ownership
+    await checkOwnerShip(_id);
+
+    const resume = await Resume.findByIdAndUpdate(
+      _id,
+      { ...rest },
+      { new: true }
+    );
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
-    throw new Error(err.message || "Failed to update resume.");
+    throw new Error(err);
   }
 };
-
-// Update only experience
-export const updateExperienceToDb = async ({ _id, experience }) => {
+export const updateExperienceToDb = async (data) => {
   try {
     db();
-    await checkOwnership(_id);
+    const { _id, experience } = data;
+    //check ownership
+    await checkOwnerShip(_id);
     const resume = await Resume.findByIdAndUpdate(
       _id,
       { experience },
@@ -82,15 +91,16 @@ export const updateExperienceToDb = async ({ _id, experience }) => {
     );
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
-    throw new Error(err.message || "Failed to update experience.");
+    throw new Error(err);
   }
 };
 
-// Update only education
-export const updateEducationToDb = async ({ _id, education }) => {
+export const updateEducationToDb = async (data) => {
   try {
     db();
-    await checkOwnership(_id);
+    const { _id, education } = data;
+    //check ownership
+    await checkOwnerShip(_id);
     const resume = await Resume.findByIdAndUpdate(
       _id,
       { education },
@@ -98,15 +108,16 @@ export const updateEducationToDb = async ({ _id, education }) => {
     );
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
-    throw new Error(err.message || "Failed to update education.");
+    throw new Error(err);
   }
 };
 
-// Update only skills
-export const updateSkillsToDb = async ({ _id, skills }) => {
+export const updateSkillsToDb = async (data) => {
   try {
     db();
-    await checkOwnership(_id);
+    const { _id, skills } = data;
+    //check ownership
+    await checkOwnerShip(_id);
     const resume = await Resume.findByIdAndUpdate(
       _id,
       { skills },
@@ -114,18 +125,16 @@ export const updateSkillsToDb = async ({ _id, skills }) => {
     );
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
-    throw new Error(err.message || "Failed to update skills.");
+    throw new Error(err);
   }
 };
-
-// Delete resume
 export const deleteResumeFromDb = async (_id) => {
   try {
     db();
-    await checkOwnership(_id);
+    await checkOwnerShip(_id);
     const resume = await Resume.findByIdAndDelete(_id);
     return JSON.parse(JSON.stringify(resume));
   } catch (err) {
-    throw new Error(err.message || "Failed to delete resume.");
+    throw new Error(err.message || "Failed to delete resume from database");
   }
 };
