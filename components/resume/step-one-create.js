@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,82 +8,83 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 
 export default function StepOneCreate() {
   const { resume, setResume, saveResume } = useResume();
-
-  //hooks
   const { isSignedIn } = useUser();
-  const handelSubmit = (e) => {
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     saveResume();
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const updatedResume = { ...resume, [name]: value };
 
-    setResume((prevState) => {
-      const updatedResume = { ...prevState, [name]: value };
-      //save the updated resume to database
+    setResume(updatedResume);
+    if (isSignedIn) {
       localStorage.setItem("resume", JSON.stringify(updatedResume));
-      return updatedResume;
-    });
+    }
   };
+
   return (
-    <div className="w-full  p=5 shadow-lg border-t-4 rounded-lg">
-      <h2 className="text-2xl font-bold mb-5">Personal Information</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="w-full p-5 shadow-lg border-t-4 border-border rounded-lg space-y-4"
+    >
+      <h2 className="text-2xl font-bold">Personal Information</h2>
+
       <Input
         name="name"
-        className="mb-3"
-        onChange={handleChange}
         value={resume.name}
-        placeholder="Your name"
+        onChange={handleChange}
+        placeholder="Your full name"
         type="text"
-        autoFocus
         required
+        autoFocus
       />
       <Input
         name="job"
-        className="mb-3"
-        onChange={handleChange}
         value={resume.job}
+        onChange={handleChange}
         placeholder="Job title"
         type="text"
         required
       />
       <Input
         name="address"
-        className="mb-3"
-        onChange={handleChange}
         value={resume.address}
+        onChange={handleChange}
         placeholder="Address"
         type="text"
         required
       />
       <Input
         name="phone"
-        className="mb-3"
-        onChange={handleChange}
         value={resume.phone}
+        onChange={handleChange}
         placeholder="Phone number"
-        type="number"
+        type="tel"
         required
       />
       <Input
         name="email"
-        className="mb-3"
-        onChange={handleChange}
         value={resume.email}
-        placeholder="Email"
+        onChange={handleChange}
+        placeholder="Email address"
         type="email"
         required
       />
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-4">
         {!isSignedIn ? (
-          <SignInButton>
-            <Button>Sign in to save</Button>
+          <SignInButton mode="modal">
+            <Button variant="default">Sign in to save</Button>
           </SignInButton>
         ) : (
-          <Button onClick={handelSubmit}>Save</Button>
+          <Button type="submit" variant="default">
+            Save & Continue
+          </Button>
         )}
       </div>
-    </div>
+    </form>
   );
 }

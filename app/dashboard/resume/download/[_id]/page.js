@@ -6,10 +6,10 @@ import Image from "next/image";
 import { useResume } from "@/context/resume";
 import ResumeCard from "@/components/cards/resume-card";
 import toast from "react-hot-toast";
+import LinkedInShareButton from "@/components/social/linkedIn-share-button";
 
 export default function DownloadPage({ params: paramsPromise }) {
-  const params = React.use(paramsPromise);
-
+  const params = React.use(paramsPromise); // Unwrap the params Promise
   const { resumes } = useResume();
   const [currentResume, setCurrentResume] = React.useState(null);
 
@@ -23,7 +23,6 @@ export default function DownloadPage({ params: paramsPromise }) {
   const printResume = () => {
     if (typeof window !== "undefined" && currentResume?._id) {
       const newWindow = window.open(`/resume/${currentResume._id}`, "_blank");
-
       if (newWindow) {
         const checkWindowLoaded = setInterval(() => {
           if (newWindow.document.readyState === "complete") {
@@ -73,27 +72,17 @@ export default function DownloadPage({ params: paramsPromise }) {
             </Button>
           </div>
 
-          <div className="flex flex-col items-center">
-            <Image
-              src="https://cdn-icons-png.flaticon.com/128/10309/10309262.png"
-              width={50}
-              height={50}
-              alt="Share Icon"
-            />
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(`
-                  ${window.location.origin}/resume/${currentResume._id}
-                `);
-                toast.success(
-                  "Link copied to clipboard to share with anyone, anywhere"
-                );
-              }}
-              className="my-2"
-            >
-              Share
-            </Button>
-          </div>
+          {currentResume && (
+            <div className="flex flex-col items-center">
+              <Image
+                src="https://cdn-icons-png.flaticon.com/128/145/145807.png"
+                width={50}
+                height={50}
+                alt="LinkedIn Icon"
+              />
+              <LinkedInShareButton resumeId={currentResume._id} />
+            </div>
+          )}
         </div>
 
         {currentResume && <ResumeCard resume={currentResume} />}

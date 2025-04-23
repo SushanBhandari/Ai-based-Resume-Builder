@@ -184,20 +184,30 @@ export function ResumeProvider({ children }) {
     const selectedExperience = experienceList[index];
     if (!selectedExperience || !selectedExperience.title) {
       toast.error(
-        "please fill in the job details for the selected experience entry"
+        "Please fill in the job details for the selected experience entry"
       );
       setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
       return;
     }
+
     const jobTitle = selectedExperience.title;
     const jobSummary = selectedExperience.summary || "";
+
     try {
       const response = await runAi(`
-        Generate a list of duties and responsibilities in html bullet points for job title "${jobTitle}" ${jobSummary} Just give 4 bullet points in a  with their subtopics in a bold`);
+        Generate a list of duties and responsibilities 4 bullet points in HTML <ul> format for the job title "${jobTitle}". 
+        Each bullet point should describe a key duty or responsibility. 
+        If the following summary is provided, consider it: "${jobSummary}". 
+        Only return the <ul> element.`);
 
-      const cleanSummary = response.replace(/html|/g, "").trim();
+      if (!response || response.length < 10) {
+        toast.error("AI returned an incomplete summary.");
+        return;
+      }
 
-      const updatedExperienceList = experienceList.slice();
+      const cleanSummary = response.trim(); // Keeping the <ul> formatting
+
+      const updatedExperienceList = [...experienceList];
       updatedExperienceList[index] = {
         ...selectedExperience,
         summary: cleanSummary,
@@ -214,12 +224,6 @@ export function ResumeProvider({ children }) {
       setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
     }
   };
-  //education
-  React.useEffect(() => {
-    if (resume.education) {
-      setEducationList(resume.education);
-    }
-  }, [resume]);
 
   const updateEducation = async (educationList) => {
     try {
@@ -354,6 +358,7 @@ export function ResumeProvider({ children }) {
         addEducation,
         removeEducation,
         skillsList,
+        setSkillsList,
         handleSkillsChange,
         handleSkillsSubmit,
         addSkill,

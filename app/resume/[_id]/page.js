@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { getResumeFromDb } from "@/actions/resume";
 import PersonalDetails from "@/components/preview/personal-details";
@@ -8,14 +10,23 @@ import Education from "@/components/preview/education";
 
 export async function generateMetadata({ params }) {
   const resume = await getResumeFromDb(params._id);
+
   return {
-    title: `${resume.name} - resume,
-    description: resume.summary,
+    title: `${resume.name} - Resume`,
+    description: resume.summary || "Check out this AI-generated resume.",
     openGraph: {
-      title: ${resume.name}'s - Resume,
-      description: resume.summary,
-      images: ["/logo.svg"],
-    }`,
+      title: `${resume.name} - Resume`,
+      description: resume.summary || "Check out this AI-generated resume.",
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/resume/${params._id}`,
+      images: [
+        {
+          url: `${process.env.NEXT_PUBLIC_SITE_URL}/preview-image.png`,
+          width: 1200,
+          height: 630,
+          alt: "Resume Preview",
+        },
+      ],
+    },
   };
 }
 

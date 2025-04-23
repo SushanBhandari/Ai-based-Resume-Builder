@@ -1,89 +1,108 @@
-import React, { useRef } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { useResume } from "@/context/resume";
+"use client";
+
+import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Brain, Loader2Icon } from "lucide-react";
+import { useResume } from "@/context/resume";
+import { Brain, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { runAi } from "@/actions/ai";
-// import dynamic from "next/dynamic";
-// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-// import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
+
 const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
   ssr: false,
 });
-function StepTwo() {
-  //context
+
+export default function StepTwo() {
   const { resume, setResume, updateResume, setStep } = useResume();
-  //state
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = useState(false);
+  const [tone, setTone] = useState("Formal");
+  const [language, setLanguage] = useState("English");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     updateResume();
     setStep(3);
   };
+
   const handleGenerateWithAi = async () => {
-    setLoading(true);
     if (!resume.job) {
-      toast.error("Please fill all your values in Personal Information");
-      setLoading(false);
+      toast.error("Please fill out your Personal Information first.");
       return;
     }
-    const response = await runAi(
-      `Generate a resume summary for a person with following details: ${JSON.stringify(
-        resume
-      )} in plain text format`
+    setLoading(true);
 
-      //  Create a professional resume summary for the following individual. Focus on strengths, experience, and goals. Return plain text only.\n\nDetails: ${JSON.stringify(resume)}
-    );
-    setResume({ ...resume, summary: response });
-    setLoading(false);
+    try {
+      const prompt = `Create a ${tone.toLowerCase()} resume summary in ${language} for the following individual based on these details: ${JSON.stringify(
+        resume
+      )}. Focus on strengths, experience, and career objectives. Return plain text.`;
+
+      const response = await runAi(prompt);
+      setResume({ ...resume, summary: response });
+    } catch (err) {
+      toast.error("Failed to generate summary. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="w-full p-5 shadow-lg border-t-4 rounded-lg">
-      <div className="flex justify-between">
-        <h2 className="text-2xl font-bold mb-5">Summary</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="w-full p-5 shadow-lg border-t-4 border-border rounded-lg space-y-4"
+    >
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Summary</h2>
         <Button
           variant="destructive"
           onClick={handleGenerateWithAi}
           disabled={loading}
         >
           {loading ? (
-            <Loader2Icon size={18} className="mr-2 animate-spin" />
+            <Loader2 size={18} className="mr-2 animate-spin" />
           ) : (
             <Brain size={18} className="mr-2" />
           )}
           Generate with AI
         </Button>
       </div>
-      {/* {
-        <Textarea
-          onChange={(e) => setResume({ ...resume, summary: e.target.value })}
-          value={resume.summary}
-          className="mb-3"
-          placeholder="write a summary about yourself"
-          rows="10"
-          required
-        />
-      } */}
 
-      {/* <ReactQuill
-        theme="snow"
-        onChange={(e) => setResume({ ...resume, summary: e })}
-        value={resume.summary}
-        className="mb-5 rounded-md"
-      /> */}
+      {/* Tone and Language Selectors */}
+      <div className="flex flex-wrap gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Tone</label>
+          <select
+            value={tone}
+            onChange={(e) => setTone(e.target.value)}
+            className="border rounded p-2"
+          >
+            <option>Formal</option>
+            <option>Friendly</option>
+            <option>Professional</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Language</label>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="border rounded p-2"
+          >
+            <option>English</option>
+            <option>Nepali</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Summary Input */}
       <RichTextEditor
         value={resume.summary}
         onChange={(val) => setResume({ ...resume, summary: val })}
+        placeholder="Write a summary about yourself"
       />
-      <div className="flex justify-end">
-        <Button onClick={handleSubmit}>Next</Button>
+
+      <div className="flex justify-end pt-4">
+        <Button type="submit">Next</Button>
       </div>
-    </div>
+    </form>
   );
 }
-
-export default StepTwo;
