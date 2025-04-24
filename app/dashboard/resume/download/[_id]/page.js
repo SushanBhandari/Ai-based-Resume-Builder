@@ -1,24 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useResume } from "@/context/resume";
-import ResumeCard from "@/components/cards/resume-card";
+import TemplateOne from "@/components/templates/TemplateOne";
+import TemplateTwo from "@/components/templates/TemplateTwo";
+import TemplateThree from "@/components/templates/TemplateThree";
 import toast from "react-hot-toast";
 import LinkedInShareButton from "@/components/social/linkedIn-share-button";
+import { getResumeFromDb } from "@/actions/resume";
 
 export default function DownloadPage({ params: paramsPromise }) {
-  const params = React.use(paramsPromise); // Unwrap the params Promise
-  const { resumes } = useResume();
-  const [currentResume, setCurrentResume] = React.useState(null);
+  const params = React.use(paramsPromise);
+  const [currentResume, setCurrentResume] = useState(null);
 
   React.useEffect(() => {
-    if (resumes && params?._id) {
-      const resume = resumes.find((r) => r._id === params._id);
-      setCurrentResume(resume);
+    const fetchResume = async () => {
+      try {
+        const resume = await getResumeFromDb(params._id);
+        setCurrentResume(resume);
+      } catch (error) {
+        console.error("Failed to fetch resume:", error);
+      }
+    };
+    if (params?._id) {
+      fetchResume();
     }
-  }, [resumes, params?._id]);
+  }, [params?._id]);
 
   const printResume = () => {
     if (typeof window !== "undefined" && currentResume?._id) {
@@ -39,9 +47,22 @@ export default function DownloadPage({ params: paramsPromise }) {
     }
   };
 
+  const renderTemplate = () => {
+    switch (currentResume?.template) {
+      case "one":
+        return <TemplateOne resume={currentResume} />;
+      case "two":
+        return <TemplateTwo resume={currentResume} />;
+      case "three":
+        return <TemplateThree resume={currentResume} />;
+      default:
+        return <TemplateOne resume={currentResume} />;
+    }
+  };
+
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-50 px-4">
-      <div className="text-center w-full md:w-1/3">
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4 py-10">
+      <div className="text-center w-full md:w-3/4 lg:w-2/3">
         <h2 className="font-bold text-2xl mb-2 text-gray-800">
           Congrats! Your AI-based Resume is ready!
         </h2>
@@ -49,30 +70,46 @@ export default function DownloadPage({ params: paramsPromise }) {
           You can now download, print, or share it with anyone.
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-10 mt-16">
-          <div className="flex flex-col items-center">
-            <Image
-              src="https://cdn-icons-png.flaticon.com/128/1091/1091007.png"
-              width={50}
-              height={50}
-              alt="Download Icon"
-            />
-            <Button className="my-2">Download</Button>
+        {/* Resume Preview */}
+        {currentResume && (
+          <div
+            id="resume-preview"
+            className="mt-10 max-h-[75vh] overflow-auto border rounded-lg shadow p-4 bg-white"
+          >
+            {renderTemplate()}
           </div>
+        )}
 
-          <div onClick={printResume} className="flex flex-col items-center">
-            <Image
-              src="https://cdn-icons-png.flaticon.com/128/3003/3003232.png"
-              width={50}
-              height={50}
-              alt="Print Icon"
-            />
-            <Button onClick={printResume} className="my-2">
-              Print
-            </Button>
-          </div>
+        {/* Buttons */}
+        {currentResume && (
+          <div className="flex flex-col sm:flex-row justify-center gap-10 mt-10">
+            <div className="flex flex-col items-center">
+              <Image
+                src="https://cdn-icons-png.flaticon.com/128/1091/1091007.png"
+                width={50}
+                height={50}
+                alt="Download Icon"
+              />
+              <Button
+                className="my-2"
+                onClick={() => toast.success("Download logic coming soon!")}
+              >
+                Download
+              </Button>
+            </div>
 
-          {currentResume && (
+            <div onClick={printResume} className="flex flex-col items-center">
+              <Image
+                src="https://cdn-icons-png.flaticon.com/128/3003/3003232.png"
+                width={50}
+                height={50}
+                alt="Print Icon"
+              />
+              <Button onClick={printResume} className="my-2">
+                Print
+              </Button>
+            </div>
+
             <div className="flex flex-col items-center">
               <Image
                 src="https://cdn-icons-png.flaticon.com/128/145/145807.png"
@@ -82,11 +119,8 @@ export default function DownloadPage({ params: paramsPromise }) {
               />
               <LinkedInShareButton resumeId={currentResume._id} />
             </div>
-          )}
-        </div>
-
-        {currentResume && <ResumeCard resume={currentResume} />}
-        <div className="mb-10" />
+          </div>
+        )}
       </div>
     </div>
   );

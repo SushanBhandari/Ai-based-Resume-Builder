@@ -244,6 +244,10 @@ export function ResumeProvider({ children }) {
     const { name, value } = e.target;
     newEntries[index][name] = value;
     setEducationList(newEntries);
+    setResume((prev) => ({
+      ...prev,
+      education: newEntries,
+    }));
   };
   const handleEducationSubmit = () => {
     updateEducation(educationList);

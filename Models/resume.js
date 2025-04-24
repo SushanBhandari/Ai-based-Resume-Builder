@@ -40,6 +40,11 @@ const ResumeSchema = new Schema(
     phone: { type: String, trim: true },
     email: { type: String, trim: true },
     themeColor: { type: String, trim: true },
+    template: {
+      type: String,
+      enum: ["one", "two", "three"],
+      default: "one",
+    },
     summary: { type: String },
     experience: [ExperienceSchema],
     education: [EducationSchema],

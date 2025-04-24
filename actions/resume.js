@@ -38,16 +38,15 @@ export const saveResumetoDb = async (data) => {
   }
 };
 
-// Get all resumes of current user
 export const getUserResumeFromDb = async () => {
-  try {
-    db();
-    const userEmail = await getUserEmail();
-    const resumes = await Resume.find({ userEmail });
-    return JSON.parse(JSON.stringify(resumes));
-  } catch (err) {
-    throw new Error(err.message || "Failed to fetch resumes.");
-  }
+  await db();
+  const user = await currentUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+
+  if (!email) throw new Error("User email not found");
+
+  const resumes = await Resume.find({ userEmail: email });
+  return JSON.parse(JSON.stringify(resumes));
 };
 
 // Get single resume by ID
