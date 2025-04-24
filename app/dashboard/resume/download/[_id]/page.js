@@ -9,12 +9,15 @@ import TemplateThree from "@/components/templates/TemplateThree";
 import toast from "react-hot-toast";
 import LinkedInShareButton from "@/components/social/linkedIn-share-button";
 import { getResumeFromDb } from "@/actions/resume";
+// import { checkAtsCompatibility } from "@/actions/atsChecker";
 
 export default function DownloadPage({ params: paramsPromise }) {
   const params = React.use(paramsPromise);
   const [currentResume, setCurrentResume] = useState(null);
+  const [atsResult, setAtsResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchResume = async () => {
       try {
         const resume = await getResumeFromDb(params._id);
@@ -58,6 +61,24 @@ export default function DownloadPage({ params: paramsPromise }) {
       default:
         return <TemplateOne resume={currentResume} />;
     }
+  };
+
+  const handleAtsCheck = async () => {
+    if (!currentResume) return;
+    setLoading(true);
+    try {
+      const resumeText = `
+        ${currentResume.summary}
+        ${currentResume.experience.map((exp) => exp.summary).join(" ")}
+        ${currentResume.skills.map((skill) => skill.name).join(", ")}
+      `;
+      const atsFeedback = await checkAtsCompatibility(resumeText, "");
+      setAtsResult(atsFeedback);
+    } catch (err) {
+      console.error(err);
+      toast.error("ATS check failed.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -121,6 +142,26 @@ export default function DownloadPage({ params: paramsPromise }) {
             </div>
           </div>
         )}
+
+        {/* ATS Checker
+        {currentResume && (
+          <div className="mt-10">
+            <Button onClick={handleAtsCheck} disabled={loading}>
+              {loading ? "Checking ATS..." : "Run ATS Checker"}
+            </Button>
+            {atsResult && (
+              <div className="mt-4 p-4 border rounded-lg bg-white text-left max-w-lg mx-auto">
+                <h3
+                  className="font-bold text-lg mb-2"
+                  style={{ color: "#4f46e5" }}
+                >
+                  ATS Compatibility Report
+                </h3>
+                <p className="text-sm whitespace-pre-wrap">{atsResult}</p>
+              </div>
+            )}
+          </div>
+        )} */}
       </div>
     </div>
   );

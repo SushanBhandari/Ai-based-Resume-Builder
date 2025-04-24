@@ -10,9 +10,10 @@ export default function TemplateTwo({ resume }) {
         <p className="text-xs">{resume.phone}</p>
         <p className="text-xs">{resume.email}</p>
         <p className="text-xs">{resume.address}</p>
-        <h2 className="font-semibold mt-4" style={{ color: resume.themeColor }}>
-          Skills
-        </h2>
+        <h2
+          className="font-semibold mt-4"
+          style={{ color: resume.themeColor }}
+        ></h2>
         <section>
           <h2
             className="font-semibold mt-4"
