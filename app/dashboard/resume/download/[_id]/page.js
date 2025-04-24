@@ -142,26 +142,6 @@ export default function DownloadPage({ params: paramsPromise }) {
             </div>
           </div>
         )}
-
-        {/* ATS Checker
-        {currentResume && (
-          <div className="mt-10">
-            <Button onClick={handleAtsCheck} disabled={loading}>
-              {loading ? "Checking ATS..." : "Run ATS Checker"}
-            </Button>
-            {atsResult && (
-              <div className="mt-4 p-4 border rounded-lg bg-white text-left max-w-lg mx-auto">
-                <h3
-                  className="font-bold text-lg mb-2"
-                  style={{ color: "#4f46e5" }}
-                >
-                  ATS Compatibility Report
-                </h3>
-                <p className="text-sm whitespace-pre-wrap">{atsResult}</p>
-              </div>
-            )}
-          </div>
-        )} */}
       </div>
     </div>
   );
