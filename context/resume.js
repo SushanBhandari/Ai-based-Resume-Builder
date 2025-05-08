@@ -180,13 +180,12 @@ export function ResumeProvider({ children }) {
     updateExperience(newEntries);
   };
   const handleExperienceGenerateWithAi = async (index) => {
-    setExperienceLoading((prevState) => ({ ...prevState, [index]: true }));
+    setExperienceLoading((prev) => ({ ...prev, [index]: true }));
+
     const selectedExperience = experienceList[index];
     if (!selectedExperience || !selectedExperience.title) {
-      toast.error(
-        "Please fill in the job details for the selected experience entry"
-      );
-      setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
+      toast.error("Please fill in the job title for this experience entry.");
+      setExperienceLoading((prev) => ({ ...prev, [index]: false }));
       return;
     }
 
@@ -194,34 +193,46 @@ export function ResumeProvider({ children }) {
     const jobSummary = selectedExperience.summary || "";
 
     try {
-      const response = await runAi(`
-        Generate a list of duties and responsibilities 4 bullet points in HTML <ul> format for the job title "${jobTitle}". 
-        Each bullet point should describe a key duty or responsibility. 
-        If the following summary is provided, consider it: "${jobSummary}". 
-        Only return the <ul> element.`);
+      const prompt = `
+        Return only an HTML <ul> element with 4 <li> items describing job responsibilities for the role of "${jobTitle}".
+        Each <li> should be a clear duty.
+        Do not include any explanations, markdown, or extra text — only the <ul> tag with its <li> children.
+        If this summary helps, use it: "${jobSummary}"
+      `;
+
+      const response = await runAi(prompt);
 
       if (!response || response.length < 10) {
         toast.error("AI returned an incomplete summary.");
         return;
       }
 
-      const cleanSummary = response.trim(); // Keeping the <ul> formatting
+      // Clean up Gemini’s weird prefixing issues (like "html" or quotes)
+      let cleanSummary = response.trim();
+      cleanSummary = cleanSummary
+        .replace(/^"html\s*/i, "")
+        .replace(/^"|"$/g, "") // remove surrounding quotes
+        .replace(/^```html|```$/g, "") // strip markdown-style wrappers if any
+        .trim();
 
       const updatedExperienceList = [...experienceList];
       updatedExperienceList[index] = {
         ...selectedExperience,
         summary: cleanSummary,
       };
+
       setExperienceList(updatedExperienceList);
-      setResume((prevState) => ({
-        ...prevState,
+      setResume((prev) => ({
+        ...prev,
         experience: updatedExperienceList,
       }));
+
+      toast.success("Summary generated successfully!");
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to generate job description");
+      console.error("AI Error:", err);
+      toast.error("Failed to generate job summary. Try again later.");
     } finally {
-      setExperienceLoading((prevState) => ({ ...prevState, [index]: false }));
+      setExperienceLoading((prev) => ({ ...prev, [index]: false }));
     }
   };
 
