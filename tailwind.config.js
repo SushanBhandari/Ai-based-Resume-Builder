@@ -1,6 +1,3 @@
-const { Container } = require("lucide-react");
-const { Padyakke_Expanded_One } = require("next/font/google");
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
@@ -20,16 +17,25 @@ module.exports = {
         },
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "#e5e7eb", // gray-200
+        input: "#f9fafb", // gray-50
+        ring: "#3b82f6", // blue-500
+        background: "#ffffff", // white
+        foreground: "#111827", // gray-900
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#3b82f6", // blue-500
+          foreground: "#ffffff", // white
+        },
+        secondary: {
+          DEFAULT: "#6b7280", // gray-500
+          foreground: "#ffffff",
+        },
+        muted: {
+          DEFAULT: "#f3f4f6", // gray-100
+          foreground: "#6b7280", // gray-500
         },
       },
     },
   },
+  plugins: [],
 };

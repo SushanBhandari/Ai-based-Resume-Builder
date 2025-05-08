@@ -9,13 +9,12 @@ import TemplateThree from "@/components/templates/TemplateThree";
 import toast from "react-hot-toast";
 import LinkedInShareButton from "@/components/social/linkedIn-share-button";
 import { getResumeFromDb } from "@/actions/resume";
-// import { checkAtsCompatibility } from "@/actions/atsChecker";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export default function DownloadPage({ params: paramsPromise }) {
   const params = React.use(paramsPromise);
   const [currentResume, setCurrentResume] = useState(null);
-  const [atsResult, setAtsResult] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchResume = async () => {
@@ -45,8 +44,48 @@ export default function DownloadPage({ params: paramsPromise }) {
       } else {
         console.error("Failed to open a new window for printing.");
       }
-    } else {
-      console.error("currentResume is not loaded yet.");
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    const resumeElement = document.getElementById("resume-preview");
+    if (!resumeElement) {
+      toast.error("Resume preview not found.");
+      return;
+    }
+
+    // ✅ Replace oklch colors with supported fallback styles
+    const allElements = resumeElement.querySelectorAll("*");
+    allElements.forEach((el) => {
+      const style = getComputedStyle(el);
+
+      if (style.color.includes("oklch")) {
+        el.style.color = "rgb(0,0,0)";
+      }
+      if (style.backgroundColor.includes("oklch")) {
+        el.style.backgroundColor = "rgb(255,255,255)";
+      }
+      if (style.borderColor.includes("oklch")) {
+        el.style.borderColor = "rgb(200,200,200)";
+      }
+    });
+
+    try {
+      const canvas = await html2canvas(resumeElement, {
+        scale: 2,
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const width = pdf.internal.pageSize.getWidth();
+      const height = (canvas.height * width) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, width, height);
+      pdf.save("resume.pdf");
+      toast.success("Resume downloaded!");
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      toast.error("Failed to generate PDF.");
     }
   };
 
@@ -61,24 +100,6 @@ export default function DownloadPage({ params: paramsPromise }) {
       default:
         return <TemplateOne resume={currentResume} />;
     }
-  };
-
-  const handleAtsCheck = async () => {
-    if (!currentResume) return;
-    setLoading(true);
-    try {
-      const resumeText = `
-        ${currentResume.summary}
-        ${currentResume.experience.map((exp) => exp.summary).join(" ")}
-        ${currentResume.skills.map((skill) => skill.name).join(", ")}
-      `;
-      const atsFeedback = await checkAtsCompatibility(resumeText, "");
-      setAtsResult(atsFeedback);
-    } catch (err) {
-      console.error(err);
-      toast.error("ATS check failed.");
-    }
-    setLoading(false);
   };
 
   return (
@@ -101,9 +122,10 @@ export default function DownloadPage({ params: paramsPromise }) {
           </div>
         )}
 
-        {/* Buttons */}
+        {/* Action Buttons */}
         {currentResume && (
           <div className="flex flex-col sm:flex-row justify-center gap-10 mt-10">
+            {/* Download */}
             <div className="flex flex-col items-center">
               <Image
                 src="https://cdn-icons-png.flaticon.com/128/1091/1091007.png"
@@ -111,26 +133,25 @@ export default function DownloadPage({ params: paramsPromise }) {
                 height={50}
                 alt="Download Icon"
               />
-              <Button
-                className="my-2"
-                onClick={() => toast.success("Download logic coming soon!")}
-              >
+              <Button className="my-2" onClick={handleDownloadPDF}>
                 Download
               </Button>
             </div>
 
-            <div onClick={printResume} className="flex flex-col items-center">
+            {/* Print */}
+            <div className="flex flex-col items-center">
               <Image
                 src="https://cdn-icons-png.flaticon.com/128/3003/3003232.png"
                 width={50}
                 height={50}
                 alt="Print Icon"
               />
-              <Button onClick={printResume} className="my-2">
+              <Button className="my-2" onClick={printResume}>
                 Print
               </Button>
             </div>
 
+            {/* LinkedIn */}
             <div className="flex flex-col items-center">
               <Image
                 src="https://cdn-icons-png.flaticon.com/128/145/145807.png"
